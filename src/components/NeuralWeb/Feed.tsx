@@ -5,7 +5,11 @@ import PostModal from './PostModal';
 import { Post } from '../../types';
 import './Feed.css';
 
-export default function Feed() {
+interface FeedProps {
+  activeCategory: string;
+}
+
+export default function Feed({ activeCategory }: FeedProps) {
   const { posts, loading, error, hasMore, loadMore } = usePosts();
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
@@ -17,12 +21,35 @@ export default function Feed() {
     setSelectedPost(null);
   };
 
+  // Filter posts by category (if not 'all')
+  const filteredPosts = activeCategory === 'all'
+    ? posts
+    : posts.filter(post => {
+        const tags = post.tags?.map(t => t.toLowerCase()) || [];
+        const title = post.title.toLowerCase();
+        const content = post.content.toLowerCase();
+
+        switch (activeCategory) {
+          case 'daily':
+            return tags.some(t => ['daily', 'life', '日常', 'casual'].includes(t)) ||
+                   title.includes('日常') || content.includes('日常');
+          case 'research':
+            return tags.some(t => ['research', 'study', '研究', 'science', 'paper'].includes(t)) ||
+                   title.includes('研究') || content.includes('研究');
+          case 'discussion':
+            return tags.some(t => ['discussion', 'chat', '讨论', 'question', 'help'].includes(t)) ||
+                   title.includes('讨论') || content.includes('讨论');
+          default:
+            return true;
+        }
+      });
+
   if (loading && posts.length === 0) {
     return (
       <div className="feed-container">
         <div className="feed-loading">
           <div className="spinner"></div>
-          <p>Loading Neural Web...</p>
+          <p>Loading...</p>
         </div>
       </div>
     );
@@ -33,7 +60,7 @@ export default function Feed() {
       <div className="feed-container">
         <div className="feed-error">
           <p>{error}</p>
-          <button onClick={() => window.location.reload()}>Retry</button>
+          <button onClick={() => window.location.reload()}>重试</button>
         </div>
       </div>
     );
@@ -41,23 +68,21 @@ export default function Feed() {
 
   return (
     <div className="feed-container">
-      <header className="feed-header">
-        <h1>Neural Web</h1>
-        <p>Discover and connect with research across disciplines</p>
-      </header>
-
-      {posts.length === 0 ? (
+      {filteredPosts.length === 0 ? (
         <div className="feed-empty">
-          <p>No posts yet. Be the first to share your research!</p>
+          <div className="empty-icon">📭</div>
+          <p>暂无内容</p>
+          <span>来发布第一个帖子吧！</span>
         </div>
       ) : (
         <>
           <div className="feed-grid">
-            {posts.map((post) => (
+            {filteredPosts.map((post, index) => (
               <PostCard
                 key={post.id}
                 post={post}
                 onClick={() => handlePostClick(post)}
+                size={index % 5 === 0 ? 'large' : index % 3 === 0 ? 'medium' : 'small'}
               />
             ))}
           </div>
@@ -65,7 +90,7 @@ export default function Feed() {
           {hasMore && (
             <div className="feed-load-more">
               <button onClick={loadMore} disabled={loading}>
-                {loading ? 'Loading...' : 'Load More'}
+                {loading ? '加载中...' : '加载更多'}
               </button>
             </div>
           )}

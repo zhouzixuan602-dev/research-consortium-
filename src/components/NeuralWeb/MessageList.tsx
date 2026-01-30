@@ -23,26 +23,33 @@ export default function MessageList({ messages, loading, error }: MessageListPro
   const formatTime = (timestamp: any) => {
     if (!timestamp) return '';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return '刚刚';
+    if (minutes < 60) return `${minutes}分钟前`;
+    if (hours < 24) return `${hours}小时前`;
+    if (days < 7) return `${days}天前`;
+
+    return date.toLocaleDateString('zh-CN', {
+      month: 'numeric',
+      day: 'numeric',
     });
   };
 
-  const formatDate = (timestamp: any) => {
-    if (!timestamp) return '';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
+  // Get floor number (reversed order - newest is highest floor)
+  const getFloorNumber = (index: number, total: number) => {
+    return total - index;
   };
 
   if (loading) {
     return (
       <div className="message-list-loading">
         <div className="spinner-small"></div>
-        <p>Loading messages...</p>
+        <p>加载评论中...</p>
       </div>
     );
   }
@@ -58,7 +65,8 @@ export default function MessageList({ messages, loading, error }: MessageListPro
   if (messages.length === 0) {
     return (
       <div className="message-list-empty">
-        <p>No messages yet. Start the discussion!</p>
+        <p>暂无评论</p>
+        <span>来发表第一条评论吧！</span>
       </div>
     );
   }
@@ -66,21 +74,11 @@ export default function MessageList({ messages, loading, error }: MessageListPro
   return (
     <div className="message-list" ref={listRef}>
       {messages.map((message, index) => {
-        // Check if we need to show a date separator
-        const showDateSeparator =
-          index === 0 ||
-          (message.createdAt &&
-            messages[index - 1].createdAt &&
-            formatDate(message.createdAt) !== formatDate(messages[index - 1].createdAt));
+        const floorNum = getFloorNumber(index, messages.length);
 
         return (
-          <React.Fragment key={message.id}>
-            {showDateSeparator && (
-              <div className="message-date-separator">
-                <span>{formatDate(message.createdAt)}</span>
-              </div>
-            )}
-            <div className="message-item">
+          <div key={message.id} className="message-item">
+            <div className="message-left">
               <div className="message-avatar">
                 {message.authorPhotoURL ? (
                   <img
@@ -94,15 +92,17 @@ export default function MessageList({ messages, loading, error }: MessageListPro
                   </div>
                 )}
               </div>
-              <div className="message-content">
-                <div className="message-header">
-                  <span className="message-author">{message.authorName}</span>
-                  <span className="message-time">{formatTime(message.createdAt)}</span>
-                </div>
-                <div className="message-text">{message.content}</div>
-              </div>
+              <div className="floor-number">{floorNum}F</div>
             </div>
-          </React.Fragment>
+
+            <div className="message-content">
+              <div className="message-header">
+                <span className="message-author">{message.authorName}</span>
+                <span className="message-time">{formatTime(message.createdAt)}</span>
+              </div>
+              <div className="message-text">{message.content}</div>
+            </div>
+          </div>
         );
       })}
     </div>
