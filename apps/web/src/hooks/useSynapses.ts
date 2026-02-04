@@ -6,6 +6,8 @@ import {
   query,
   onSnapshot,
   addDoc,
+  deleteDoc,
+  doc,
   serverTimestamp,
   where,
 } from 'firebase/firestore';
@@ -75,5 +77,9 @@ export function useSynapses(neuronId?: string) {
     return docRef.id;
   };
 
-  return { synapses, loading, error, createSynapse };
+  const deleteSynapse = async (synapseId: string): Promise<void> => {
+    await deleteDoc(doc(db, 'synapses', synapseId));
+  };
+
+  return { synapses, loading, error, createSynapse, deleteSynapse };
 }
