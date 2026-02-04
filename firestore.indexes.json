@@ -1,4 +1,29 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "neurons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "activation", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "synapses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "preNeuronId", "order": "ASCENDING" },
+        { "fieldPath": "postNeuronId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "spikes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "processed", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }
