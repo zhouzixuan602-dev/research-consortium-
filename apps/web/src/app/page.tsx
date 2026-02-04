@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { NeuronList } from '@/components/NeuronList';
+import { SpikePanel } from '@/components/SpikePanel';
 import { SignIn } from '@/components/SignIn';
 
 export default function Home() {
@@ -24,7 +25,10 @@ export default function Home() {
           <p style={{ color: '#888', marginBottom: '24px' }}>Sign in to interact with the neural network.</p>
         </div>
       ) : (
-        <NeuronList />
+        <>
+          <NeuronList />
+          <SpikePanel />
+        </>
       )}
     </main>
   );
