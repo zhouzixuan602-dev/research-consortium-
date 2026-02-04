@@ -68,4 +68,27 @@ When a spike propagates through a synapse:
 ```
 newWeight = min(1.0, weight + plasticity * spikeStrength)
 ```
-"Neurons that fire together, wire together."
+Neurons that fire together, wire together.
+
+## React Components
+
+| Component | Description |
+|-----------|-------------|
+| NeuronList | Display neurons with activation bars, create/delete |
+| SynapseList | Display synapses with weight bars, create/delete |
+| SpikePanel | Display recent spike events |
+| SignIn | Google authentication button |
+| ErrorBoundary | Graceful error handling wrapper |
+| StimulateButton | Button to increase neuron activation |
+| NetworkSelector | Toggle between DMN/ECN/PFC networks |
+| CreateSynapseForm | Form to connect two neurons |
+
+## React Hooks
+
+| Hook | Description |
+|------|-------------|
+| useNeurons | CRUD operations for neurons with real-time sync |
+| useSynapses | CRUD operations for synapses with real-time sync |
+| useSpikes | Read spike events with real-time sync |
+| useUser | Current user profile |
+| useStimulate | Stimulate neuron activation |

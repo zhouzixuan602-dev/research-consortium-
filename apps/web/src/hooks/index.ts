@@ -9,3 +9,5 @@ export type { Spike } from './useSpikes';
 
 export { useUser } from './useUser';
 export type { UserProfile } from './useUser';
+
+export { useStimulate } from './useStimulate';
