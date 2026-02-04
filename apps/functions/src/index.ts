@@ -13,3 +13,6 @@ export { onSpikeCreated } from './spikes';
 
 // Scheduled tasks
 export { decayNeuronActivations } from './decay';
+
+// Auth triggers
+export { onUserCreated, onUserDeleted } from './auth';
