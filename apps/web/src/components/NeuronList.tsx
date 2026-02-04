@@ -5,8 +5,9 @@ import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useNeurons, Neuron } from '@/hooks/useNeurons';
 
-function NeuronCard({ neuron }: { neuron: Neuron }) {
+function NeuronCard({ neuron, onDelete }: { neuron: Neuron; onDelete: () => void }) {
   const [stimulating, setStimulating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const activationPercent = Math.round(neuron.activation * 100);
   const isFiring = neuron.activation >= neuron.threshold;
 
@@ -19,6 +20,16 @@ function NeuronCard({ neuron }: { neuron: Neuron }) {
       });
     } finally {
       setStimulating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(`Delete neuron "${neuron.label}"?`)) return;
+    setDeleting(true);
+    try {
+      await onDelete();
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -37,22 +48,39 @@ function NeuronCard({ neuron }: { neuron: Neuron }) {
           <strong>{neuron.label}</strong>
           <span style={{ color: '#888', fontSize: '12px', marginLeft: '8px' }}>{neuron.type}</span>
         </div>
-        <button
-          onClick={handleStimulate}
-          disabled={stimulating}
-          style={{
-            padding: '4px 12px',
-            background: '#f59e0b',
-            border: 'none',
-            color: '#000',
-            cursor: stimulating ? 'wait' : 'pointer',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontWeight: 'bold',
-          }}
-        >
-          {stimulating ? '...' : '⚡'}
-        </button>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <button
+            onClick={handleStimulate}
+            disabled={stimulating}
+            style={{
+              padding: '4px 12px',
+              background: '#f59e0b',
+              border: 'none',
+              color: '#000',
+              cursor: stimulating ? 'wait' : 'pointer',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+            }}
+          >
+            {stimulating ? '...' : '⚡'}
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            style={{
+              padding: '4px 8px',
+              background: '#ef4444',
+              border: 'none',
+              color: '#fff',
+              cursor: deleting ? 'wait' : 'pointer',
+              borderRadius: '4px',
+              fontSize: '12px',
+            }}
+          >
+            {deleting ? '...' : '✕'}
+          </button>
+        </div>
       </div>
       <div
         style={{
@@ -88,7 +116,7 @@ function NeuronCard({ neuron }: { neuron: Neuron }) {
 }
 
 export function NeuronList() {
-  const { neurons, loading, error, createNeuron } = useNeurons();
+  const { neurons, loading, error, createNeuron, deleteNeuron } = useNeurons();
   const [newLabel, setNewLabel] = useState('');
   const [newType, setNewType] = useState<Neuron['type']>('topic');
 
@@ -132,7 +160,7 @@ export function NeuronList() {
       </div>
 
       {neurons.map((neuron) => (
-        <NeuronCard key={neuron.id} neuron={neuron} />
+        <NeuronCard key={neuron.id} neuron={neuron} onDelete={() => deleteNeuron(neuron.id)} />
       ))}
     </div>
   );
