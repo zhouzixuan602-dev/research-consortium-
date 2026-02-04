@@ -4,10 +4,20 @@ import { useState } from 'react';
 import { useNeurons } from '@/hooks/useNeurons';
 import { useSynapses, Synapse } from '@/hooks/useSynapses';
 
-function SynapseCard({ synapse, neurons }: { synapse: Synapse; neurons: Map<string, string> }) {
+function SynapseCard({ synapse, neurons, onDelete }: { synapse: Synapse; neurons: Map<string, string>; onDelete: () => void }) {
+  const [deleting, setDeleting] = useState(false);
   const weightPercent = Math.round(synapse.weight * 100);
   const preName = neurons.get(synapse.preNeuronId) || 'Unknown';
   const postName = neurons.get(synapse.postNeuronId) || 'Unknown';
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await onDelete();
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <div
@@ -26,6 +36,21 @@ function SynapseCard({ synapse, neurons }: { synapse: Synapse; neurons: Map<stri
         <span style={{ marginLeft: 'auto', color: '#888', fontSize: '12px' }}>
           weight: {weightPercent}%
         </span>
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          style={{
+            padding: '2px 6px',
+            background: '#ef4444',
+            border: 'none',
+            color: '#fff',
+            cursor: deleting ? 'wait' : 'pointer',
+            borderRadius: '4px',
+            fontSize: '10px',
+          }}
+        >
+          {deleting ? '...' : '✕'}
+        </button>
       </div>
       <div
         style={{
@@ -50,7 +75,7 @@ function SynapseCard({ synapse, neurons }: { synapse: Synapse; neurons: Map<stri
 
 export function SynapseList() {
   const { neurons } = useNeurons();
-  const { synapses, loading, error, createSynapse } = useSynapses();
+  const { synapses, loading, error, createSynapse, deleteSynapse } = useSynapses();
   const [preId, setPreId] = useState('');
   const [postId, setPostId] = useState('');
   const [creating, setCreating] = useState(false);
@@ -115,7 +140,7 @@ export function SynapseList() {
       </div>
 
       {synapses.map((synapse) => (
-        <SynapseCard key={synapse.id} synapse={synapse} neurons={neuronMap} />
+        <SynapseCard key={synapse.id} synapse={synapse} neurons={neuronMap} onDelete={() => deleteSynapse(synapse.id)} />
       ))}
     </div>
   );
