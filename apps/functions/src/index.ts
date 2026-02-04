@@ -16,3 +16,6 @@ export { decayNeuronActivations } from './decay';
 
 // Auth triggers
 export { onUserCreated, onUserDeleted } from './auth';
+
+// Cleanup triggers
+export { onNeuronDeleted } from './cleanup';
