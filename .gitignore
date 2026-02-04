@@ -1,23 +1,20 @@
 # Dependencies
 node_modules/
-functions/node_modules/
 
 # Build output
 build/
-functions/lib/
+dist/
+lib/
+.next/
+out/
 
 # Environment variables
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*.local
 
 # Firebase
 .firebase/
-firebase-debug.log
-firestore-debug.log
-ui-debug.log
+*-debug.log
 
 # IDE
 .idea/
@@ -36,3 +33,13 @@ coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Functions
+apps/functions/lib/
