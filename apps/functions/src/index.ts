@@ -10,3 +10,6 @@ export { onNeuronCreated, onNeuronUpdated } from './neurons';
 
 // Spike triggers
 export { onSpikeCreated } from './spikes';
+
+// Scheduled tasks
+export { decayNeuronActivations } from './decay';
