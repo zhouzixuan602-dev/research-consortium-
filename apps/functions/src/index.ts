@@ -7,3 +7,6 @@ export { healthCheck } from './health';
 
 // Neuron triggers
 export { onNeuronCreated, onNeuronUpdated } from './neurons';
+
+// Spike triggers
+export { onSpikeCreated } from './spikes';
