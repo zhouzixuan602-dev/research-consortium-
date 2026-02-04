@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { NeuronList } from '@/components/NeuronList';
 import { SpikePanel } from '@/components/SpikePanel';
+import { SynapseList } from '@/components/SynapseList';
 import { SignIn } from '@/components/SignIn';
 
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
       ) : (
         <>
           <NeuronList />
+          <SynapseList />
           <SpikePanel />
         </>
       )}
