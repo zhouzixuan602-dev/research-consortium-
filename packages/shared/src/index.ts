@@ -49,6 +49,35 @@ export interface Synapse {
 export type NetworkType = 'DMN' | 'ECN' | 'PFC';
 
 /**
+ * Cognitive network definitions with metadata.
+ */
+export const COGNITIVE_NETWORKS: Record<NetworkType, { name: string; description: string }> = {
+  DMN: {
+    name: 'Default Mode Network',
+    description: 'Background processing, idea incubation, self-referential thought',
+  },
+  ECN: {
+    name: 'Executive Control Network',
+    description: 'Active task focus, goal-directed reasoning, working memory',
+  },
+  PFC: {
+    name: 'Prefrontal Cortex',
+    description: 'Decision making, priority weighting, impulse control',
+  },
+};
+
+/**
+ * Default configuration values for neural simulation.
+ */
+export const NEURAL_DEFAULTS = {
+  threshold: 0.7,
+  decay: 0.1,
+  plasticity: 0.05,
+  initialActivation: 0,
+  initialWeight: 0.5,
+} as const;
+
+/**
  * User profile for authentication.
  */
 export interface UserProfile {
