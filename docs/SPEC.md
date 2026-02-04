@@ -44,6 +44,7 @@ neural-web/
 | healthCheck | HTTP | Health check endpoint |
 | onNeuronCreated | Firestore | Set default neuron values |
 | onNeuronUpdated | Firestore | Fire neuron, propagate spikes |
+| onNeuronDeleted | Firestore | Clean up connected synapses |
 | onSpikeCreated | Firestore | Update target activation, Hebbian learning |
 | decayNeuronActivations | Scheduled | Decay all neuron activations |
 | onUserCreated | Auth | Create user profile |
