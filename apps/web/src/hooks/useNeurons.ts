@@ -7,6 +7,8 @@ import {
   orderBy,
   onSnapshot,
   addDoc,
+  deleteDoc,
+  doc,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -69,5 +71,9 @@ export function useNeurons() {
     return docRef.id;
   };
 
-  return { neurons, loading, error, createNeuron };
+  const deleteNeuron = async (neuronId: string): Promise<void> => {
+    await deleteDoc(doc(db, 'neurons', neuronId));
+  };
+
+  return { neurons, loading, error, createNeuron, deleteNeuron };
 }
