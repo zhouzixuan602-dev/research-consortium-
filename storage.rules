@@ -1,8 +1,37 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow read, write: if false;
+
+    // Helper: Check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Helper: Check file size
+    function maxSize(mb) {
+      return request.resource.size < mb * 1024 * 1024;
+    }
+
+    // Helper: Check if image
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    // User profile photos: users/{uid}/profile/*
+    match /users/{userId}/profile/{fileName} {
+      allow read: if true;
+      allow write: if isAuth()
+        && request.auth.uid == userId
+        && isImage()
+        && maxSize(5);
+    }
+
+    // Neuron attachments: neurons/{neuronId}/*
+    match /neurons/{neuronId}/{fileName} {
+      allow read: if isAuth();
+      allow write: if isAuth()
+        && isImage()
+        && maxSize(10);
     }
   }
 }
