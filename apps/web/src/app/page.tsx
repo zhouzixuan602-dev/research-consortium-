@@ -5,6 +5,7 @@ import { NeuronList } from '@/components/NeuronList';
 import { SpikePanel } from '@/components/SpikePanel';
 import { SynapseList } from '@/components/SynapseList';
 import { SignIn } from '@/components/SignIn';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -26,11 +27,11 @@ export default function Home() {
           <p style={{ color: '#888', marginBottom: '24px' }}>Sign in to interact with the neural network.</p>
         </div>
       ) : (
-        <>
+        <ErrorBoundary>
           <NeuronList />
           <SynapseList />
           <SpikePanel />
-        </>
+        </ErrorBoundary>
       )}
     </main>
   );
