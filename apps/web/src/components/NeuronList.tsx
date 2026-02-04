@@ -1,11 +1,26 @@
 'use client';
 
 import { useState } from 'react';
+import { doc, updateDoc, increment } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { useNeurons, Neuron } from '@/hooks/useNeurons';
 
 function NeuronCard({ neuron }: { neuron: Neuron }) {
+  const [stimulating, setStimulating] = useState(false);
   const activationPercent = Math.round(neuron.activation * 100);
   const isFiring = neuron.activation >= neuron.threshold;
+
+  const handleStimulate = async () => {
+    setStimulating(true);
+    try {
+      const neuronRef = doc(db, 'neurons', neuron.id);
+      await updateDoc(neuronRef, {
+        activation: Math.min(1, neuron.activation + 0.2),
+      });
+    } finally {
+      setStimulating(false);
+    }
+  };
 
   return (
     <div
@@ -17,9 +32,27 @@ function NeuronCard({ neuron }: { neuron: Neuron }) {
         background: isFiring ? '#052e16' : '#111',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <strong>{neuron.label}</strong>
-        <span style={{ color: '#888', fontSize: '12px' }}>{neuron.type}</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <strong>{neuron.label}</strong>
+          <span style={{ color: '#888', fontSize: '12px', marginLeft: '8px' }}>{neuron.type}</span>
+        </div>
+        <button
+          onClick={handleStimulate}
+          disabled={stimulating}
+          style={{
+            padding: '4px 12px',
+            background: '#f59e0b',
+            border: 'none',
+            color: '#000',
+            cursor: stimulating ? 'wait' : 'pointer',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+          }}
+        >
+          {stimulating ? '...' : '⚡'}
+        </button>
       </div>
       <div
         style={{
