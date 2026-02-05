@@ -9,3 +9,5 @@ export { NetworkSelector } from './NetworkSelector';
 export { PostCard } from './PostCard';
 export { Feed } from './Feed';
 export { PostModal } from './PostModal';
+export { MessageList } from './MessageList';
+export { MessageInput } from './MessageInput';

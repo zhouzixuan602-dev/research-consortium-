@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Post } from '@/hooks/usePosts';
+import { useMessages } from '@/hooks/useMessages';
+import { MessageList } from './MessageList';
+import { MessageInput } from './MessageInput';
 
 interface PostModalProps {
   postId: string;
@@ -14,6 +17,7 @@ interface PostModalProps {
 export function PostModal({ postId, onClose, isAuthenticated }: PostModalProps) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+  const { messages, loading: messagesLoading, error: messagesError, sendMessage } = useMessages(postId);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -52,6 +56,10 @@ export function PostModal({ postId, onClose, isAuthenticated }: PostModalProps) 
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
+
+  const handleSendMessage = async (content: string) => {
+    await sendMessage(content);
+  };
 
   return (
     <div
@@ -93,6 +101,7 @@ export function PostModal({ postId, onClose, isAuthenticated }: PostModalProps) 
             position: 'sticky',
             top: 0,
             background: '#111',
+            zIndex: 10,
           }}
         >
           <h2 style={{ margin: 0, fontSize: '18px' }}>Post Detail</h2>
@@ -198,7 +207,7 @@ export function PostModal({ postId, onClose, isAuthenticated }: PostModalProps) 
                   padding: '16px 0',
                   borderTop: '1px solid #333',
                   borderBottom: '1px solid #333',
-                  marginBottom: '20px',
+                  marginBottom: '24px',
                   color: '#888',
                   fontSize: '14px',
                 }}
@@ -207,20 +216,19 @@ export function PostModal({ postId, onClose, isAuthenticated }: PostModalProps) 
                 <span>{post.interestCount} interests</span>
               </div>
 
-              {/* Placeholder for messages - will be implemented in STEP 3 */}
-              <div
-                style={{
-                  padding: '24px',
-                  background: '#0a0a0a',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  color: '#666',
-                }}
-              >
-                <p style={{ margin: '0 0 8px 0' }}>Discussion thread coming in STEP 3</p>
-                {!isAuthenticated && (
-                  <p style={{ margin: 0, fontSize: '13px' }}>Sign in to participate</p>
-                )}
+              {/* Discussion thread section */}
+              <div>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#ccc' }}>
+                  Discussion ({messages.length})
+                </h3>
+
+                {/* Messages list */}
+                <div style={{ marginBottom: '20px' }}>
+                  <MessageList messages={messages} loading={messagesLoading} error={messagesError} />
+                </div>
+
+                {/* Message input */}
+                <MessageInput onSend={handleSendMessage} isAuthenticated={isAuthenticated} />
               </div>
             </>
           )}

@@ -14,3 +14,6 @@ export { useStimulate } from './useStimulate';
 
 export { usePosts } from './usePosts';
 export type { Post, SortMode } from './usePosts';
+
+export { useMessages } from './useMessages';
+export type { Message } from './useMessages';
