@@ -4,6 +4,7 @@
 
 /**
  * Spike - Discrete information impulse traveling through the network.
+ * Created when posts/messages/interests trigger neural activity.
  */
 export interface Spike {
   id: string;
@@ -42,6 +43,59 @@ export interface Synapse {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// =============================================================================
+// Zhihu-like Post/Discussion Types
+// =============================================================================
+
+/**
+ * Post - A discussion topic in the Neural Web feed.
+ * Creating a post triggers a Spike to related Neurons.
+ */
+export interface Post {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorPhotoURL?: string;
+  title: string;
+  abstract: string;
+  coverImageURL?: string;
+  tags: string[];
+  messageCount: number;
+  interestCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  lastActivityAt: Date; // Updated when new message/interest added
+}
+
+/**
+ * Message - A text reply in a post's discussion thread.
+ * Stored as subcollection: posts/{postId}/messages/{messageId}
+ */
+export interface Message {
+  id: string;
+  postId: string;
+  authorId: string;
+  authorName: string;
+  authorPhotoURL?: string;
+  content: string; // Plain text only
+  createdAt: Date;
+}
+
+/**
+ * Interest - A user's "synaptic tag" on a post (like a bookmark/like).
+ * Stored as subcollection: posts/{postId}/interests/{uid}
+ */
+export interface Interest {
+  uid: string;
+  displayName: string;
+  photoURL?: string;
+  createdAt: Date;
+}
+
+// =============================================================================
+// Cognitive Networks
+// =============================================================================
 
 /**
  * Cognitive network identifiers (DMN, ECN, PFC).
@@ -84,5 +138,8 @@ export interface UserProfile {
   uid: string;
   email: string;
   displayName: string;
+  photoURL?: string;
+  bio?: string;
   createdAt: Date;
+  updatedAt?: Date;
 }

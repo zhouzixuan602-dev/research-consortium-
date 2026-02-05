@@ -7,10 +7,37 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Helper: Check if user has a complete profile
+    function hasProfile() {
+      return isAuth() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
     // Users collection
     match /users/{userId} {
-      allow read: if isAuth();
+      allow read: if true; // Public read for avatars/names
       allow write: if isAuth() && request.auth.uid == userId;
+    }
+
+    // Posts collection - public discussion topics
+    match /posts/{postId} {
+      allow read: if true; // Public read
+      allow create: if hasProfile();
+      allow update: if hasProfile() && request.auth.uid == resource.data.authorId;
+      allow delete: if hasProfile() && request.auth.uid == resource.data.authorId;
+
+      // Messages subcollection - discussion thread
+      match /messages/{messageId} {
+        allow read: if true; // Public read
+        allow create: if hasProfile();
+        allow update, delete: if false; // Messages are immutable
+      }
+
+      // Interests subcollection - synaptic tags
+      match /interests/{uid} {
+        allow read: if true; // Public read
+        allow create, delete: if isAuth() && request.auth.uid == uid;
+        allow update: if false;
+      }
     }
 
     // Neurons collection
