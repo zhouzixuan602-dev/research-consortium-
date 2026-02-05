@@ -6,3 +6,6 @@ export { ErrorBoundary } from './ErrorBoundary';
 export { CreateSynapseForm } from './CreateSynapseForm';
 export { StimulateButton } from './StimulateButton';
 export { NetworkSelector } from './NetworkSelector';
+export { PostCard } from './PostCard';
+export { Feed } from './Feed';
+export { PostModal } from './PostModal';
