@@ -807,3 +807,166 @@ body {
 .mr-auto {
   margin-right: auto;
 }
+
+/* ── Auth Screen ─────────────────────────────────────────── */
+.auth-screen {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+
+.auth-card {
+  width: 420px;
+  max-width: 92vw;
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.auth-logo h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+}
+
+.auth-section-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.user-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  font-family: var(--font);
+  width: 100%;
+}
+
+.user-option:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.user-option-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-option-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.user-option-bio {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-tertiary);
+  font-size: 0.78rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--glass-border);
+}
+
+.auth-input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 0 14px;
+  font-family: var(--font);
+  font-size: 0.9rem;
+  background: var(--surface);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.auth-input:focus {
+  border-color: var(--accent);
+}
+
+/* ── Sort Select ─────────────────────────────────────────── */
+.feed-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-select {
+  height: 30px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 0 8px;
+  background: var(--surface);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.sort-select:focus {
+  border-color: var(--accent);
+}
+
+/* ── Interest Active Tag ─────────────────────────────────── */
+.tag-chip.interest-active {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: white;
+  border-color: #ee5a24;
+}
+
+/* ── Nav Username ────────────────────────────────────────── */
+.nav-username {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}

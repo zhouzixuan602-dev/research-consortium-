@@ -3,13 +3,19 @@ import { db } from './db';
 import { fireSpike, tokenize, decayAll, getTopNeurons } from './engine';
 import type { Post, Message, User, Neuron, NetworkType, Interest } from './types';
 
-/** Reactive list of posts, optionally filtered by network and search */
-export function usePosts(network: NetworkType | null, search: string) {
+export type SortMode = 'newest' | 'oldest' | 'most_discussed' | 'most_upvoted';
+
+/** Reactive list of posts with filtering and sorting */
+export function usePosts(
+  network: NetworkType | null,
+  search: string,
+  sortMode: SortMode,
+  filterTags: string[]
+) {
   const [posts, setPosts] = useState<(Post & { author?: User })[]>([]);
 
   const refresh = useCallback(async () => {
-    let query = db.posts.orderBy('createdAt').reverse();
-    let all = await query.toArray();
+    let all = await db.posts.toArray();
 
     if (network) {
       all = all.filter((p) => p.network === network);
@@ -23,12 +29,30 @@ export function usePosts(network: NetworkType | null, search: string) {
           p.tags.some((t) => t.includes(s))
       );
     }
+    if (filterTags.length > 0) {
+      all = all.filter((p) => p.tags.some((t) => filterTags.includes(t)));
+    }
+
+    switch (sortMode) {
+      case 'newest':
+        all.sort((a, b) => b.createdAt - a.createdAt);
+        break;
+      case 'oldest':
+        all.sort((a, b) => a.createdAt - b.createdAt);
+        break;
+      case 'most_discussed':
+        all.sort((a, b) => b.messageCount - a.messageCount);
+        break;
+      case 'most_upvoted':
+        all.sort((a, b) => b.upvotes - a.upvotes);
+        break;
+    }
 
     const users = await db.users.toArray();
     const userMap = new Map(users.map((u) => [u.id!, u]));
     const enriched = all.map((p) => ({ ...p, author: userMap.get(p.authorId) }));
     setPosts(enriched);
-  }, [network, search]);
+  }, [network, search, sortMode, filterTags]);
 
   useEffect(() => {
     refresh();
@@ -65,21 +89,67 @@ export function useMessages(postId: number | null) {
 /** All users */
 export function useUsers() {
   const [users, setUsers] = useState<User[]>([]);
-  useEffect(() => {
-    db.users.toArray().then(setUsers);
+  const refresh = useCallback(async () => {
+    const all = await db.users.toArray();
+    setUsers(all);
   }, []);
-  return users;
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+  return { users, refresh };
 }
 
-/** Current user (first user acts as "me") */
+/** Current user from localStorage with login/register/logout */
 export function useCurrentUser() {
   const [user, setUser] = useState<User | null>(null);
-  useEffect(() => {
-    db.users.toArray().then((users) => {
-      if (users.length > 0) setUser(users[0]);
-    });
+  const [loading, setLoading] = useState(true);
+
+  const loadUser = useCallback(async () => {
+    const storedId = localStorage.getItem('neurozhihu_user_id');
+    if (storedId) {
+      const u = await db.users.get(Number(storedId));
+      if (u) {
+        setUser(u);
+        setLoading(false);
+        return;
+      }
+    }
+    setUser(null);
+    setLoading(false);
   }, []);
-  return user;
+
+  useEffect(() => {
+    loadUser();
+  }, [loadUser]);
+
+  const login = useCallback(async (userId: number) => {
+    const u = await db.users.get(userId);
+    if (u) {
+      localStorage.setItem('neurozhihu_user_id', String(userId));
+      setUser(u);
+    }
+  }, []);
+
+  const register = useCallback(async (name: string, initials: string, bio: string) => {
+    const id = await db.users.add({
+      name,
+      avatar: initials.toUpperCase().slice(0, 2),
+      bio,
+      interests: [],
+      createdAt: Date.now(),
+    });
+    localStorage.setItem('neurozhihu_user_id', String(id));
+    const u = await db.users.get(id);
+    if (u) setUser(u);
+    return id;
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('neurozhihu_user_id');
+    setUser(null);
+  }, []);
+
+  return { user, loading, login, register, logout, reload: loadUser };
 }
 
 /** Interests for a user */
@@ -87,7 +157,10 @@ export function useInterests(userId: number | null) {
   const [interests, setInterests] = useState<Interest[]>([]);
 
   const refresh = useCallback(async () => {
-    if (!userId) return;
+    if (!userId) {
+      setInterests([]);
+      return;
+    }
     const all = await db.interests.where('userId').equals(userId).toArray();
     setInterests(all);
   }, [userId]);

@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { seedDatabase } from './seed';
 import {
   usePosts,
   useMessages,
   useCurrentUser,
+  useUsers,
   useInterests,
   useCreatePost,
   useCreateMessage,
@@ -11,6 +12,7 @@ import {
   useUpvoteMessage,
   useNeurons,
 } from './hooks';
+import type { SortMode } from './hooks';
 import type { NetworkType } from './types';
 import TopNav from './components/TopNav';
 import SidebarLeft from './components/SidebarLeft';
@@ -18,6 +20,7 @@ import FeedCenter from './components/FeedCenter';
 import PostDetail from './components/PostDetail';
 import NeuronPanel from './components/NeuronPanel';
 import NewPostModal from './components/NewPostModal';
+import AuthScreen from './components/AuthScreen';
 import { db } from './db';
 
 export default function App() {
@@ -26,9 +29,16 @@ export default function App() {
   const [selectedNetwork, setSelectedNetwork] = useState<NetworkType | null>(null);
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const [showNewPost, setShowNewPost] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>('newest');
+  const [filterTags, setFilterTags] = useState<string[]>([]);
 
-  const currentUser = useCurrentUser();
-  const { posts, refresh: refreshPosts } = usePosts(selectedNetwork, search);
+  const { user: currentUser, loading: authLoading, login, register, logout, reload: reloadUser } = useCurrentUser();
+  const { users, refresh: refreshUsers } = useUsers();
+
+  // Stable filterTags reference for usePosts
+  const stableFilterTags = useMemo(() => filterTags, [filterTags.join(',')]);
+
+  const { posts, refresh: refreshPosts } = usePosts(selectedNetwork, search, sortMode, stableFilterTags);
   const { messages, refresh: refreshMessages } = useMessages(selectedPostId);
   const { interests, toggleInterest } = useInterests(currentUser?.id ?? null);
   const { neurons, refresh: refreshNeurons } = useNeurons(selectedNetwork);
@@ -37,15 +47,18 @@ export default function App() {
   const upvotePost = useUpvotePost();
   const upvoteMessage = useUpvoteMessage();
 
-  // Initialize
+  // Initialize seed data
   useEffect(() => {
     seedDatabase().then(() => setReady(true));
   }, []);
 
   // Refresh posts when ready
   useEffect(() => {
-    if (ready) refreshPosts();
-  }, [ready, refreshPosts]);
+    if (ready) {
+      refreshPosts();
+      refreshUsers();
+    }
+  }, [ready, refreshPosts, refreshUsers]);
 
   const selectedPost = posts.find((p) => p.id === selectedPostId) ?? null;
 
@@ -95,20 +108,50 @@ export default function App() {
     [toggleInterest, refreshNeurons]
   );
 
+  const handleToggleFilterTag = useCallback((tag: string) => {
+    setFilterTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  }, []);
+
   const handleGlobalRefresh = useCallback(async () => {
-    // Used after import: re-seed if needed, then refresh everything
     const count = await db.users.count();
     if (count === 0) await seedDatabase();
     refreshPosts();
     refreshNeurons();
-  }, [refreshPosts, refreshNeurons]);
+    refreshUsers();
+  }, [refreshPosts, refreshNeurons, refreshUsers]);
 
-  if (!ready) {
+  const handleLogin = useCallback(async (userId: number) => {
+    await login(userId);
+  }, [login]);
+
+  const handleRegister = useCallback(async (name: string, initials: string, bio: string) => {
+    await register(name, initials, bio);
+    refreshUsers();
+  }, [register, refreshUsers]);
+
+  const handleLogout = useCallback(() => {
+    logout();
+  }, [logout]);
+
+  if (!ready || authLoading) {
     return (
       <div className="empty-state" style={{ height: '100vh' }}>
         <div className="empty-icon">&#x1F9E0;&#xFE0E;</div>
         <p>Initializing neural networks...</p>
       </div>
+    );
+  }
+
+  // Show auth screen if not logged in
+  if (!currentUser) {
+    return (
+      <AuthScreen
+        users={users}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+      />
     );
   }
 
@@ -119,6 +162,7 @@ export default function App() {
         onSearchChange={setSearch}
         currentUser={currentUser}
         onRefresh={handleGlobalRefresh}
+        onLogout={handleLogout}
       />
 
       <div className="app-layout">
@@ -127,6 +171,8 @@ export default function App() {
           onNetworkChange={setSelectedNetwork}
           interests={interests}
           onToggleInterest={handleToggleInterest}
+          filterTags={filterTags}
+          onToggleFilterTag={handleToggleFilterTag}
         />
 
         <FeedCenter
@@ -135,6 +181,8 @@ export default function App() {
           onSelectPost={setSelectedPostId}
           onNewPost={() => setShowNewPost(true)}
           onUpvote={handleUpvotePost}
+          sortMode={sortMode}
+          onSortChange={setSortMode}
         />
 
         <aside className="panel-right">

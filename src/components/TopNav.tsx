@@ -7,9 +7,10 @@ interface Props {
   onSearchChange: (s: string) => void;
   currentUser: User | null;
   onRefresh: () => void;
+  onLogout: () => void;
 }
 
-export default function TopNav({ search, onSearchChange, currentUser, onRefresh }: Props) {
+export default function TopNav({ search, onSearchChange, currentUser, onRefresh, onLogout }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {
@@ -61,9 +62,17 @@ export default function TopNav({ search, onSearchChange, currentUser, onRefresh 
           style={{ display: 'none' }}
           onChange={handleFileChange}
         />
+        {currentUser && (
+          <span className="nav-username">{currentUser.name}</span>
+        )}
         <button className="avatar-btn" title={currentUser?.name || 'Profile'}>
           {currentUser?.avatar || '?'}
         </button>
+        {currentUser && (
+          <button className="btn btn-ghost btn-sm" onClick={onLogout}>
+            Logout
+          </button>
+        )}
       </div>
     </nav>
   );

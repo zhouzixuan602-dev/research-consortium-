@@ -1,4 +1,5 @@
 import type { Post, User } from '../types';
+import type { SortMode } from '../hooks';
 
 function timeAgo(ts: number): string {
   const diff = Date.now() - ts;
@@ -11,12 +12,21 @@ function timeAgo(ts: number): string {
   return `${days}d ago`;
 }
 
+const SORT_OPTIONS: { value: SortMode; label: string }[] = [
+  { value: 'newest', label: 'Newest' },
+  { value: 'oldest', label: 'Oldest' },
+  { value: 'most_discussed', label: 'Most Discussed' },
+  { value: 'most_upvoted', label: 'Most Upvoted' },
+];
+
 interface Props {
   posts: (Post & { author?: User })[];
   selectedPostId: number | null;
   onSelectPost: (id: number) => void;
   onNewPost: () => void;
   onUpvote: (id: number) => void;
+  sortMode: SortMode;
+  onSortChange: (s: SortMode) => void;
 }
 
 export default function FeedCenter({
@@ -25,20 +35,33 @@ export default function FeedCenter({
   onSelectPost,
   onNewPost,
   onUpvote,
+  sortMode,
+  onSortChange,
 }: Props) {
   return (
     <section className="feed-center">
       <div className="feed-header">
         <h2>Feed</h2>
-        <button className="btn btn-primary btn-sm" onClick={onNewPost}>
-          + New Post
-        </button>
+        <div className="feed-controls">
+          <select
+            className="sort-select"
+            value={sortMode}
+            onChange={(e) => onSortChange(e.target.value as SortMode)}
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <button className="btn btn-primary btn-sm" onClick={onNewPost}>
+            + New Post
+          </button>
+        </div>
       </div>
 
       {posts.length === 0 && (
         <div className="empty-state">
           <div className="empty-icon">&#x1F4AD;&#xFE0E;</div>
-          <p>No posts yet. Start a discussion!</p>
+          <p>No posts match your filters.</p>
         </div>
       )}
 

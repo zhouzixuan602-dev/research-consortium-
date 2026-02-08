@@ -18,6 +18,8 @@ interface Props {
   onNetworkChange: (n: NetworkType | null) => void;
   interests: Interest[];
   onToggleInterest: (tag: string) => void;
+  filterTags: string[];
+  onToggleFilterTag: (tag: string) => void;
 }
 
 export default function SidebarLeft({
@@ -25,8 +27,11 @@ export default function SidebarLeft({
   onNetworkChange,
   interests,
   onToggleInterest,
+  filterTags,
+  onToggleFilterTag,
 }: Props) {
   const activeTagSet = new Set(interests.filter((i) => i.active).map((i) => i.tag));
+  const filterSet = new Set(filterTags);
 
   return (
     <aside className="sidebar-left">
@@ -63,15 +68,39 @@ export default function SidebarLeft({
       </div>
 
       <div className="panel glass">
-        <div className="panel-title">Interests</div>
+        <div className="panel-title">Filter by Tag</div>
         <div className="tag-list">
           {ALL_TAGS.map((tag) => (
             <button
               key={tag}
-              className={`tag-chip ${activeTagSet.has(tag) ? 'active' : ''}`}
-              onClick={() => onToggleInterest(tag)}
+              className={`tag-chip ${filterSet.has(tag) ? 'active' : ''}`}
+              onClick={() => onToggleFilterTag(tag)}
             >
               {tag}
+            </button>
+          ))}
+        </div>
+        {filterTags.length > 0 && (
+          <button
+            className="btn btn-ghost btn-sm"
+            style={{ marginTop: 8, width: '100%' }}
+            onClick={() => filterTags.forEach(onToggleFilterTag)}
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
+
+      <div className="panel glass">
+        <div className="panel-title">My Interests</div>
+        <div className="tag-list">
+          {ALL_TAGS.map((tag) => (
+            <button
+              key={tag}
+              className={`tag-chip ${activeTagSet.has(tag) ? 'interest-active' : ''}`}
+              onClick={() => onToggleInterest(tag)}
+            >
+              {activeTagSet.has(tag) ? '\u2665 ' : ''}{tag}
             </button>
           ))}
         </div>
